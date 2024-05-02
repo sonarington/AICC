@@ -1,0 +1,42 @@
+def deal_by_seoul():
+    
+    svckey = my_key
+
+    ymd = input("계약월 입력(예: 201911) : ")
+
+    def code2(a):
+        return a[:2]
+    def code5(a):
+        return a[:5]
+    seoul = lawd_cd[:]
+    seoul['code'] = seoul['code'].apply(str)
+    seoul = seoul.loc[seoul['code'].apply(code2) == '11', ['code', 'name', 'check']]
+    print(seoul)
+    seoul_list = list(sorted(set(seoul[1:]['code'].apply(code5))))
+    print(seoul_list)
+    seoul_name = []
+    for i in seoul_list:
+        i = i + '00000'
+        seoul_name.append(seoul.loc[seoul['code'] == i, 'name'].head(1).iloc[0].split()[1])
+    #lawd_cd[(lawd_cd['name'].str.contains(in_text)) & (lawd_cd['check'] == "존재")].head(1).iloc[0,0].astype(str)[0:5]    
+    #seoul_name = seoul.loc[seoul['code'].apply(code5) , ['code', 'name', 'check']]
+    print(seoul_name, len(seoul_name))
+
+    file_name_list = []
+    for i in range(len(seoul_list)):
+        area_cd = "LAWD_CD=" + seoul_list[i]
+        deal_dt = "DEAL_YMD=" + ymd
+        svc_key = "serviceKey=" + svckey
+        url = base_url + "?" + area_cd + "&" + deal_dt + "&" + svc_key
+    
+        response = requests.get(url)
+        items_list = find_xml_items(response)
+        result = pd.DataFrame(items_list)
+        
+        name_info = seoul_name[i] + "_" + ymd
+        file_name = f"data/result_{name_info}.csv"
+    
+        result.to_csv(file_name, index=False)
+        
+        file_name_list.append(file_name)
+    return file_name_list
