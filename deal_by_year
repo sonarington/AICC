@@ -1,0 +1,39 @@
+def deal_by_year():
+    
+    svckey = my_key
+
+    cd_name = input("검색지역 입력 : ")
+    cd = find_lawd_cd(cd_name)
+
+    ym_list = []
+    #today_ym = datetime.today().strftime("%Y%m")
+    today_y = int(datetime.today().strftime("%Y"))
+    today_m = int(datetime.today().strftime("%m"))
+    start_y = today_y - 1
+    start_m = today_m # + 1
+    for i in range(-1, 11):
+        yy = start_y
+        mm = (start_m + i) % 12 + 1
+        if start_m + i > 11:
+            yy += 1
+        ym_list.append(str(yy) + f'{str(mm):>02}')
+    #ym_list     
+    
+    file_name_list = []
+    for i in ym_list:
+        area_cd = "LAWD_CD=" + cd
+        deal_dt = "DEAL_YMD=" + i
+        svc_key = "serviceKey=" + svckey
+        url = base_url + "?" + area_cd + "&" + deal_dt + "&" + svc_key
+    
+        response = requests.get(url)
+        items_list = find_xml_items(response)
+        result = pd.DataFrame(items_list)
+        
+        name_info = cd_name + "_" + i
+        file_name = f"data/result_{name_info}.csv"
+    
+        result.to_csv(file_name, index=False)
+
+        file_name_list.append(file_name)
+    return file_name_list
